@@ -1,21 +1,61 @@
-"use client"
+'use client'
 
-import * as Y from 'yjs';
-import { useState, useEffect } from 'react';
-import { todo } from 'node:test';
+import { useEffect, useState } from 'react'
+import * as Y from 'yjs'
+import { shapes } from '@/lib/ydoc'
 
-export default function Home() {
-  const [id, setId] = useState<number | null>(null);
+export default function Page() {
+  const [renderTick, setRenderTick] = useState(0)
 
   useEffect(() => {
-    const doc = new Y.Doc();
-    const todos : any = doc.getArray("todos");
-    const item = new Y.Map();
-    item.set("text", "Buy milk");
-    item.set("done", true);
-    console.log(todos)
-    setId(doc.clientID);
-  }, []);
+    const observer = () => {
+      setRenderTick(t => t + 1)
+    }
 
-  return <>{id}</>;
+    shapes.observe(observer)
+
+    return () => shapes.unobserve(observer)
+  }, [])
+
+  const addRect = () => {
+    const shape = new Y.Map()
+
+    shape.set('id', crypto.randomUUID())
+    shape.set('type', 'rect')
+    shape.set('x', 100)
+    shape.set('y', 100)
+    shape.set('width', 150)
+    shape.set('height', 100)
+    shape.set('color', 'blue')
+
+    shapes.push([shape])
+  }
+
+  const allShapes = shapes.toArray()
+
+  return (
+    <div>
+      <button onClick={addRect}>Add Rectangle</button>
+
+      <div style={{ position: 'relative', height: 600 }}>
+        {allShapes.map((shape, i) => {
+          const data = shape.toJSON()
+
+          return (
+            <div
+              key={data.id}
+              style={{
+                position: 'absolute',
+                left: data.x,
+                top: data.y,
+                width: data.width,
+                height: data.height,
+                background: data.color
+              }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
 }

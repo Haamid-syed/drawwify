@@ -6,6 +6,7 @@ import { shapes } from '@/lib/ydoc'
 
 export default function Page() {
   const [renderTick, setRenderTick] = useState(0)
+  const [size, setSize] = useState<string>("")
 
   useEffect(() => {
     const observer = () => {
@@ -18,23 +19,32 @@ export default function Page() {
   }, [])
 
   const addRect = () => {
-    const shape = new Y.Map()
+  const parsedSize = Number(size)
 
-    shape.set('id', crypto.randomUUID())
-    shape.set('type', 'rect')
-    shape.set('x', 100)
-    shape.set('y', 100)
-    shape.set('width', 150)
-    shape.set('height', 100)
-    shape.set('color', 'blue')
+  if (!size || isNaN(parsedSize) || parsedSize <= 0) return
 
-    shapes.push([shape])
-  }
+  const shape = new Y.Map()
+
+  shape.set('id', crypto.randomUUID())
+  shape.set('type', 'rect')
+  shape.set('x', 100)
+  shape.set('y', 100)
+  shape.set('width', parsedSize)
+  shape.set('height', parsedSize)
+  shape.set('color', 'blue')
+
+  shapes.push([shape])
+}
+
+  const sizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setSize(e.target.value)
+}
 
   const allShapes = shapes.toArray()
 
   return (
     <div>
+      <input type="number" value={size} onChange={sizeChange}/>
       <button onClick={addRect}>Add Rectangle</button>
 
       <div style={{ position: 'relative', height: 600 }}>
